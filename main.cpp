@@ -71,7 +71,7 @@ std::vector<Token> tokenise(const std::string& input) {
 }
 
 std::string tokensToASM(std::vector<Token> tokens) {
-    std::string asmCode;
+    std::stringstream output;
     for (int i = 0; i < tokens.size(); i++) {
         Token token = tokens[i];
         if (token.tokenType == TokenType::RETURN && i < tokens.size()-2) {
@@ -81,7 +81,7 @@ std::string tokensToASM(std::vector<Token> tokens) {
         }
     }
 
-    return asmCode;
+    return output.str();
 }
 
 int main() {
