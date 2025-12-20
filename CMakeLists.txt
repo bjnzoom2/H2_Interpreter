@@ -42,5 +42,7 @@ add_custom_command(TARGET H2_Compiled_Program POST_BUILD
 )
 
 add_executable(H2_Interpreter main.cpp
-        tokenization.h)
+        tokenization.h
+        parsing.h
+        generation.h)
 configure_file(File.h2 ${CMAKE_CURRENT_BINARY_DIR}/File.h2 COPYONLY)

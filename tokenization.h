@@ -66,7 +66,7 @@ public:
                 exit(EXIT_FAILURE);
             }
         }
-
+        m_index = 0;
         return tokens;
     }
 };
