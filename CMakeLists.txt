@@ -10,8 +10,8 @@ endif()
 
 # Source assembly and object paths
 # Change ASM_SRC if your compiler generates the .asm into a different directory.
-set(ASM_SRC "${CMAKE_SOURCE_DIR}/out.asm")
-set(ASM_OBJ "${CMAKE_BINARY_DIR}/out.obj")
+set(ASM_SRC "${CMAKE_SOURCE_DIR}/cmake-build-debug/out.asm")
+set(ASM_OBJ "${CMAKE_BINARY_DIR}/cmake-build-debug/out.obj")
 
 # Custom command: assemble out.asm -> out.obj
 add_custom_command(

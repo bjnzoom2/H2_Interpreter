@@ -70,13 +70,38 @@ std::vector<Token> tokenise(const std::string& input) {
     return tokens;
 }
 
-std::string tokensToASM(std::vector<Token> tokens) {
+void interpret(const std::vector<Token> &tokens) {
+    for (int i = 0; i < tokens.size(); i++) {
+        Token token = tokens[i];
+        if (token.tokenType == TokenType::UNKNOWN) {
+            std::cerr << "Unknown syntax detected\n";
+            return;
+        }
+        if (token.tokenType == TokenType::RETURN && i < tokens.size()-2) {
+            if (tokens[i+1].tokenType == TokenType::NUMBER && tokens[i+2].tokenType == TokenType::SEMICOLON) {
+                std::cout << tokens[i+1].text << '\n';
+            } else if (tokens[i+1].tokenType == TokenType::IDENTIFIER) {
+                if (symbolTable[tokens[i+1].text]) std::cout << symbolTable[tokens[i+1].text] << '\n';
+            }
+        }
+        if (token.tokenType == TokenType::ASSIGN) {
+            if (tokens[i-1].tokenType == TokenType::IDENTIFIER && tokens[i+1].tokenType == TokenType::NUMBER && tokens[i+2].tokenType == TokenType::SEMICOLON
+                && i > 0 && i < tokens.size()-2) {
+                symbolTable[tokens[i-1].text] = std::stoi(tokens[i+1].text);
+            }
+        }
+    }
+}
+
+std::string tokensToASM(const std::vector<Token> &tokens) {
     std::stringstream output;
+    output << "global main\nsection .text\nmain:\n";
     for (int i = 0; i < tokens.size(); i++) {
         Token token = tokens[i];
         if (token.tokenType == TokenType::RETURN && i < tokens.size()-2) {
             if (tokens[i+1].tokenType == TokenType::NUMBER && tokens[i+2].tokenType == TokenType::SEMICOLON) {
-
+                output << "    mov eax, " << std::stoi(tokens[i+1].text) << "\n";
+                output << "    ret\n";
             }
         }
     }
@@ -89,28 +114,18 @@ int main() {
 
     if (codeFile.is_open()) {
         std::string inputLine;
+        std::string asmCode;
         while (std::getline(codeFile, inputLine)) {
             std::vector<Token> tokens = tokenise(inputLine);
-            for (int i = 0; i < tokens.size(); i++) {
-                Token token = tokens[i];
-                if (token.tokenType == TokenType::UNKNOWN) {
-                    std::cerr << "Unknown syntax detected\n";
-                    return -1;
-                }
-                if (token.tokenType == TokenType::RETURN && i < tokens.size()-2) {
-                    if (tokens[i+1].tokenType == TokenType::NUMBER && tokens[i+2].tokenType == TokenType::SEMICOLON) {
-                        std::cout << tokens[i+1].text << '\n';
-                    } else if (tokens[i+1].tokenType == TokenType::IDENTIFIER) {
-                        if (symbolTable[tokens[i+1].text]) std::cout << symbolTable[tokens[i+1].text] << '\n';
-                    }
-                }
-                if (token.tokenType == TokenType::ASSIGN) {
-                    if (tokens[i-1].tokenType == TokenType::IDENTIFIER && tokens[i+1].tokenType == TokenType::NUMBER && tokens[i+2].tokenType == TokenType::SEMICOLON
-                        && i > 0 && i < tokens.size()-2) {
-                        symbolTable[tokens[i-1].text] = std::stoi(tokens[i+1].text);
-                    }
-                }
-            }
+            //interpret(tokens);
+            asmCode = tokensToASM(tokens);
+        }
+        std::ofstream asmFile{"out.asm"};
+        if (asmFile.is_open()) {
+            asmFile << asmCode;
+            std::cout << "Successfully Compiled";
+        } else {
+            std::cout << "Failed to create file\n";
         }
     } else {
         std::cerr << "Failed to open file\n";
