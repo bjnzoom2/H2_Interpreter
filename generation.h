@@ -4,21 +4,41 @@
 
 class Generator {
 private:
-    node::RetNode m_tree;
+    ProgNode m_tree;
+    static std::stringstream m_output;
 public:
-    explicit inline Generator(node::RetNode tree) : m_tree(std::move(tree)) {}
-    [[nodiscard]] std::string generate() const {
-        std::stringstream output;
-        output << "global main\nextern printf\nsection .data\nfmt db \"%d\", 10, 0\nsection .text\nmain:\n";
-        output << "    sub rsp, 32\n";
-        output << "    lea rcx, [rel fmt]\n";
-        output << "    mov edx, " << std::stoi(m_tree.expr.num_lit.text) << "\n";
-        output << "    xor eax, eax\n";
-        output << "    call printf\n";
-        output << "    add rsp, 32\n";
-        output << "    xor eax, eax\n";
-        output << "    ret\n";
+    explicit inline Generator(ProgNode tree) : m_tree(std::move(tree)) {}
+    void gen_expr(ExprNode &expr) {
+        struct expr_Visitor {
+            void operator() (ExprNodeNumLit& exprNumLit) {
+                //TBA
+            };
 
-        return output.str();
+            void operator() (ExprNodeIdent& exprIdent) {
+                //TBA
+            };
+        };
+        std::visit(expr_Visitor(), expr.node);
+    }
+
+    void gen_stmt(StmtNode &stmt) {
+        struct stmt_Visitor {
+            void operator() (StmtExitNode& stmtExit) {
+                //TBA
+            };
+
+            void operator() (StmtLetNode& stmtLet) {
+                //TBA
+            };
+        };
+        std::visit(stmt_Visitor(), stmt.stmt);
+    }
+
+    [[nodiscard]] std::string gen_prog() {
+        m_output << "global main\nsection .text\nmain:\n";
+        for (StmtNode &stmt : m_tree.stmtNodes) {
+            gen_stmt(stmt);
+        }
+        return m_output.str();
     }
 };

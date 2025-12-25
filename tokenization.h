@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 
-enum TokenType {UNKNOWN, SEMICOLON, RETURN, NUMBER};
+enum TokenType {UNKNOWN, SEMICOLON, EXIT, NUM_LIT, LET, EQUAL, IDENT, OPEN_PARAN, CLOSE_PARAN};
 
 struct Token {
     TokenType tokenType = UNKNOWN;
@@ -38,25 +38,42 @@ public:
                 while (peek().has_value() && std::isalnum(peek().value())) {
                     buffer.push_back(consume());
                 }
-                if (buffer == "return") {
-                    tokens.push_back({TokenType::RETURN, "return"});
+                if (buffer == "exit") {
+                    tokens.push_back({TokenType::EXIT, "exit"});
+                    buffer.clear();
+                    continue;
+                } else if (buffer == "let") {
+                    tokens.push_back({TokenType::LET, "let"});
                     buffer.clear();
                     continue;
                 } else {
-                    std::cerr << "Invalid syntax\n";
-                    exit(EXIT_FAILURE);
+                    tokens.push_back({TokenType::IDENT, buffer});
+                    buffer.clear();
+                    continue;
                 }
             } else if (std::isdigit(peek().value())) {
                 buffer.push_back(consume());
                 while (peek().has_value() && std::isdigit(peek().value())) {
                     buffer.push_back(consume());
                 }
-                tokens.push_back({TokenType::NUMBER, buffer});
+                tokens.push_back({TokenType::NUM_LIT, buffer});
                 buffer.clear();
                 continue;
             } else if (peek().value() == ';') {
                 consume();
                 tokens.push_back({TokenType::SEMICOLON, ";"});
+                continue;
+            } else if (peek().value() == '=') {
+                consume();
+                tokens.push_back({TokenType::EQUAL, "="});
+                continue;
+            } else if (peek().value() == '(') {
+                consume();
+                tokens.push_back({TokenType::OPEN_PARAN, "("});
+                continue;
+            } else if (peek().value() == ')') {
+                consume();
+                tokens.push_back({TokenType::CLOSE_PARAN, ")"});
                 continue;
             } else if (std::isspace(peek().value())) {
                 consume();

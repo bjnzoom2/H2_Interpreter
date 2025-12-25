@@ -15,8 +15,8 @@ void interpret(const std::vector<Token> &tokens) {
             std::cerr << "Unknown syntax detected\n";
             return;
         }
-        if (token.tokenType == TokenType::RETURN && i < tokens.size()-2) {
-            if (tokens[i+1].tokenType == TokenType::NUMBER && tokens[i+2].tokenType == TokenType::SEMICOLON) {
+        if (token.tokenType == TokenType::EXIT && i < tokens.size()-2) {
+            if (tokens[i+1].tokenType == TokenType::NUM_LIT && tokens[i+2].tokenType == TokenType::SEMICOLON) {
                 std::cout << tokens[i+1].text << '\n';
             }
         }
@@ -36,13 +36,13 @@ int main() {
         Tokenizer tokenizer(std::move(inputLine));
         std::vector<Token> tokens = tokenizer.tokenise();
         Parser parser(std::move(tokens));
-        std::optional<node::RetNode> tree = parser.parseReturn();
+        std::optional<ProgNode> tree = parser.parseProg();
         if (!tree.has_value()) {
             std::cerr << "Parsing Failed\n";
             exit(EXIT_FAILURE);
         }
         Generator generator(std::move(tree.value()));
-        asmCode = generator.generate();
+        asmCode = generator.gen_prog();
 
         std::ofstream asmFile{"out.asm"};
         if (asmFile.is_open()) {
