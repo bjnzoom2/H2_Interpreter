@@ -53,9 +53,13 @@ public:
 
     std::optional<ProgNode> parseProg() {
         ProgNode prog;
+        /*for (const Token &token : m_tokens) {
+            std::cout << token.tokenType << '\n';
+        }*/
         while (peek().has_value()) {
             if (auto stmtNode = parseStmt()) {
                 prog.stmtNodes.push_back(stmtNode.value());
+                consume();
             } else {
                 std::cerr << "Invalid Stmt\n";
                 exit(EXIT_FAILURE);
@@ -73,13 +77,11 @@ public:
             if (auto exprNode = parseExpr()) {
                 stmtExit = StmtExitNode{exprNode.value()};
             }
-            consume();
-            if (peek().has_value() && peek().value().tokenType == TokenType::CLOSE_PARAN) {
-                consume();
-            } else {
+            if (peek().has_value() && peek().value().tokenType != TokenType::CLOSE_PARAN) {
                 std::cerr << "Close Paran is missing\n";
                 exit(EXIT_FAILURE);
             }
+            consume();
             if (peek().has_value() && peek().value().tokenType == TokenType::SEMICOLON) {
                 return StmtNode{stmtExit};
             } else {
@@ -103,6 +105,7 @@ public:
                 exit(EXIT_FAILURE);
             }
         } else {
+            std::cerr << "Nil\n";
             return {};
         }
     }
